@@ -5,25 +5,24 @@ import android.util.Log
 import android.view.SurfaceView
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import com.example.meetapp.VideoConfig
 import io.agora.rtc2.ChannelMediaOptions
 import io.agora.rtc2.IRtcEngineEventHandler
 import io.agora.rtc2.RtcEngine
 import io.agora.rtc2.RtcEngineConfig
 import io.agora.rtc2.video.VideoCanvas
-import io.agora.rtm.RtmClient
 
-val videoConfig = VideoConfig(
-    "54321",
-    "007eJxSYLDaH2TWdPX10VmsLC+cA3sPGD9SMMzxjD2mu/ZQwmUd3sUKDGaJBikGSYZGaWYG5iaJiSkWhhbJlpZpaZbGpqYpJiYmLF+j0grEGRjOXd/FysjAyMDCwMgA4jOBSWYwyQJlGxoZszKYmhgbGQICAAD//7A0ICA=",
-    "6a0d0b12f6074aad818c99ff9355d444",
-    "123",
+data class VideoConfig(
+    val userId: String,
+    val token: String,
+    val apiId: String,
+    val channelName: String
 )
 
 data class VideoView(val video:SurfaceView,val uid:Int)
 class VideoViewModel : ViewModel() {
 
     private lateinit var videoEngine: RtcEngine
+    private lateinit var videoConfig: VideoConfig
     private val _activeVideoView = mutableStateListOf<VideoView>()
 
     lateinit var context: Context
@@ -33,7 +32,8 @@ class VideoViewModel : ViewModel() {
         _activeVideoView.add(VideoView(videoView,uid))
     }
 
-    fun startEngine(context: Context): Unit {
+    fun startEngine(context: Context, videoConfig: VideoConfig): Unit {
+        this.videoConfig = videoConfig
         this.context = context
         val config = RtcEngineConfig()
         config.mContext = context
@@ -44,9 +44,10 @@ class VideoViewModel : ViewModel() {
             videoEngine.enableVideo();
             videoEngine.startPreview()
             val localView = SurfaceView(context)
+            joinMeet()
             videoEngine.setupLocalVideo(VideoCanvas(localView,VideoCanvas.RENDER_MODE_FIT, videoConfig.userId.toInt()))
             addVideoView(localView, videoConfig.userId.toInt())
-            joinMeet()
+
             Log.d(TAG, "Start Engine Success. Brrrr brrrr brrr(Noise of the engine)")
         } catch (e:Exception){
             Log.d(TAG, "startEngin: Error occurect while createing view engine${e.message}")
@@ -70,6 +71,10 @@ class VideoViewModel : ViewModel() {
             _activeVideoView.find {
             it.uid == uid
         })
+    }
+
+    fun destroy() {
+        RtcEngine.destroy()
     }
 
     val sessionEventHandler = object : IRtcEngineEventHandler() {

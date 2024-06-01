@@ -1,94 +1,97 @@
 package com.example.meetapp
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.SurfaceView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.meetapp.controller.VideoView
-import com.example.meetapp.controller.VideoViewModel
-import io.agora.rtc2.ChannelMediaOptions
-import io.agora.rtc2.IRtcEngineEventHandler
-import io.agora.rtc2.RtcEngine
-import io.agora.rtc2.RtcEngineConfig
-import io.agora.rtc2.video.VideoCanvas
-
-
-data class VideoConfig(
-    val userId: String,
-    val token: String,
-    val apiId: String,
-    val channelName: String
-)
-
-
-const val TAG = "IN MAIN RUNNING TRIP"
+import com.example.meetapp.controller.Configs
+import com.example.meetapp.controller.LoginViewModel
+import com.example.meetapp.view.MeetActivity
+import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
-    private val videoVM: VideoViewModel by viewModels()
+    private val loginVM: LoginViewModel by viewModels()
+
+    private val navigateToMeet = fun(configs: Configs) {
+        val intent = Intent(this, MeetActivity::class.java).apply {
+            val gson = Gson()
+            val configsJson = gson.toJson(configs)
+            putExtra("configs", configsJson)
+        }
+        startActivity(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        videoVM.startEngine(baseContext);
-
-//        val t = SurfaceView(this)
-//        videoVM.videoEngine.setupLocalVideo(VideoCanvas(t,VideoCanvas.RENDER_MODE_FIT, videoConfig.userId.toInt()))
-//        videoVM.addVideoView(t)
-//        updateTheArray push t2 also
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
-            Box(modifier = Modifier.padding(50.dp)){
-                RenderSurfaceViews(surfaceViews = videoVM.activeViewView)
+            if(!loginVM.isTokenSuccess){
+                Toast.makeText(this,"Error While logging in, Please try again", Toast.LENGTH_LONG).show()
+                loginVM.setTokenSuccess(true)
+            }
+            Box(modifier = Modifier.padding(50.dp)) {
+                UserInputScreen() { it1, it2 ->
+                    loginVM.getAgoraToken(it1, it2, navigateToMeet)
+                }
             }
         }
     }
 }
 
 @Composable
-fun RenderSurfaceViews(surfaceViews: List<VideoView>) {
+fun UserInputScreen(onSubmit: (String, String) -> Unit) {
+    var username by remember { mutableStateOf("") }
+    var channelName by remember { mutableStateOf("") }
+
     Column(
-        modifier = Modifier.fillMaxSize().border(2.dp, Color.Black),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        surfaceViews.forEach { surfaceView ->
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16 / 9f)
-                    .border(3.dp, Color.Red),  // Adjust the aspect ratio as needed
-                factory = { surfaceView.video }
-            )
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextField(
+            value = channelName,
+            onValueChange = { channelName = it },
+            label = { Text("Channel Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { onSubmit(username, channelName) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Submit")
         }
     }
 }
-/*
-class MainActivity : ComponentActivity() {
-    private val chatVM: ChatViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        chatVM.initChatServices()
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ChatScreen(chatVM = chatVM)
-        }
-    }
-}
- */

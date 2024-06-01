@@ -3,7 +3,6 @@ package com.example.meetapp.controller
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.traceEventEnd
 import androidx.lifecycle.ViewModel
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.MessageEvent
@@ -64,7 +63,7 @@ class ChatViewModel : ViewModel() {
         )
     }
 
-    fun setChatFailed (failed: Boolean){
+    fun setChatFailed(failed: Boolean) {
         _chatServiceFailed.value = failed
     }
 
@@ -73,12 +72,7 @@ class ChatViewModel : ViewModel() {
     }
 
     fun initChatServices(
-        chatConfig: ChatConfig = ChatConfig(
-            "54321",
-            "007eJxSYBCY9G3LzN+/uIz/nt28be3EpuDSC7qPlj77uXRuvsfdbm1nBQazRIMUgyRDozQzA3OTxMQUC0OLZEvLtDRLY1PTFBMTE/4dUWkF4gwMnxkWMTAxMIIxiM8CJpkZDI2MWRlMTYyNDEEyEDmoACAAAP//7D0jwQ==",
-            "6a0d0b12f6074aad818c99ff9355d444",
-            "123",
-        )
+        chatConfig: ChatConfig
     ) {
         this.chatConfig = chatConfig
         try {
@@ -94,6 +88,13 @@ class ChatViewModel : ViewModel() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun destroy() {
+        rtmClient.logout(object : ResultCallback<Void> {
+            override fun onSuccess(responseInfo: Void?) {}
+            override fun onFailure(errorInfo: ErrorInfo?) {}
+        })
     }
 
     private val loginCallBacks = object : ResultCallback<Void> {
