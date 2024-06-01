@@ -35,7 +35,7 @@ data class ChatConfig(
 
 class ChatViewModel : ViewModel() {
 
-    lateinit var rtmClient: RtmClient
+    private lateinit var rtmClient: RtmClient
     private val _chatMessages = mutableStateListOf<ChatMessage>()
     val chatMessages: List<ChatMessage> get() = _chatMessages
 
@@ -75,7 +75,7 @@ class ChatViewModel : ViewModel() {
     fun initChatServices(
         chatConfig: ChatConfig = ChatConfig(
             "54321",
-            "007eJxSYPir+HvxvX2PzrfVmC+b9GytWfm+N2yTjr1371Tpfig8oXOeAoNZokGKQZKhUZqZgblJYmKKhaFFsqVlWpqlsalpiomJSZ1yVFqBOANDwN9VDEwMjGAM4rOASWYGQyNjVgZTE2MjQ5AMRA4qAAgAAP//8AYj1A==",
+            "007eJxSYBCY9G3LzN+/uIz/nt28be3EpuDSC7qPlj77uXRuvsfdbm1nBQazRIMUgyRDozQzA3OTxMQUC0OLZEvLtDRLY1PTFBMTE/4dUWkF4gwMnxkWMTAxMIIxiM8CJpkZDI2MWRlMTYyNDEEyEDmoACAAAP//7D0jwQ==",
             "6a0d0b12f6074aad818c99ff9355d444",
             "123",
         )
