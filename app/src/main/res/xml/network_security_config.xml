@@ -2,9 +2,11 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">10.0.2.2</domain> <!-- For emulator access -->
-        <domain includeSubdomains="true">192.168.220.114</domain> <!-- For emulator access -->
-
-        <!-- Add your local network IP if you are using a physical device -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">192.168.220.114</domain>
+        <domain includeSubdomains="true">nitinsingh.in</domain>
+        <trust-anchors>
+            <certificates src="@raw/my_ca" />
+        </trust-anchors>
     </domain-config>
 </network-security-config>

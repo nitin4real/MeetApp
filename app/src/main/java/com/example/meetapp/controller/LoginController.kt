@@ -36,9 +36,9 @@ class LoginViewModel : ViewModel() {
                     val tokenResponse = response.body()
                     tokenResponse?.let {
                         val videoConfig =
-                            VideoConfig(userId, it.tokens.rtcToken, it.appId, channelName)
+                            VideoConfig(it.uid, it.tokens.rtcToken, it.appId, channelName)
                         val chatConfig =
-                            ChatConfig(userId, it.tokens.rtmToken, it.appId, channelName)
+                            ChatConfig(it.uid, it.tokens.rtmToken, it.appId, channelName)
                         configs = Configs(videoConfig,chatConfig)
                         navigateToConfigs(configs)
                     }

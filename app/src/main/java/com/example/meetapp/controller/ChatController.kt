@@ -46,7 +46,10 @@ class ChatViewModel : ViewModel() {
         Log.d(TAG, "Log all the s: ")
     }
 
-    fun sendMessage(chatMessage: ChatMessage) {
+    fun sendMessage(message: String) {
+        val timestamp =
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+        val chatMessage = ChatMessage(chatConfig.userId, message, timestamp, false)
         rtmClient.publish(
             chatConfig.channelName,
             chatMessage.message,
@@ -91,6 +94,10 @@ class ChatViewModel : ViewModel() {
     }
 
     fun destroy() {
+        rtmClient.unsubscribe(chatConfig.channelName, object : ResultCallback<Void> {
+            override fun onSuccess(responseInfo: Void?) {}
+            override fun onFailure(errorInfo: ErrorInfo?) {}
+        })
         rtmClient.logout(object : ResultCallback<Void> {
             override fun onSuccess(responseInfo: Void?) {}
             override fun onFailure(errorInfo: ErrorInfo?) {}

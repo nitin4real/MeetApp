@@ -8,6 +8,7 @@ import retrofit2.http.Query
 data class TokenResponse(
     val appId: String,
     val tokens: Tokens,
+    val uid: String
 )
 data class Tokens (
     val rtmToken: String,
