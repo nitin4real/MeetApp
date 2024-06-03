@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.meetapp.data.UserRepository
 import io.agora.rtm.ErrorInfo
 import io.agora.rtm.MessageEvent
 import io.agora.rtm.PresenceEvent
@@ -19,14 +20,14 @@ import java.time.format.DateTimeFormatter
 const val TAG = "Test Agora Android"
 
 data class ChatMessage(
-    val userName: String,
+    val uid: String,
     val message: String,
     val timestamp: String,
     val recived: Boolean
 )
 
 data class ChatConfig(
-    val userId: String,
+    val uid: String,
     val token: String,
     val apiId: String,
     val channelName: String
@@ -49,7 +50,7 @@ class ChatViewModel : ViewModel() {
     fun sendMessage(message: String) {
         val timestamp =
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
-        val chatMessage = ChatMessage(chatConfig.userId, message, timestamp, false)
+        val chatMessage = ChatMessage(chatConfig.uid, message, timestamp, false)
         rtmClient.publish(
             chatConfig.channelName,
             chatMessage.message,
@@ -79,7 +80,7 @@ class ChatViewModel : ViewModel() {
     ) {
         this.chatConfig = chatConfig
         try {
-            val rtmConfig = RtmConfig.Builder(chatConfig.apiId, chatConfig.userId)
+            val rtmConfig = RtmConfig.Builder(chatConfig.apiId, chatConfig.uid)
                 .eventListener(connectionCallbacks)
                 .build()
 
@@ -121,7 +122,7 @@ class ChatViewModel : ViewModel() {
         override fun onMessageEvent(event: MessageEvent?) {
             Log.d(TAG, "onMessageEvent: ${event?.message}")
             val timestamp =
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) ?: ""
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
             event?.let {
                 addMessage(
                     ChatMessage(
@@ -135,7 +136,10 @@ class ChatViewModel : ViewModel() {
         }
 
         override fun onPresenceEvent(event: PresenceEvent?) {
-            Log.d(TAG, "onPressence: ${event}")
+            if(event?.publisherId !=null){
+                UserRepository.registerUid(event.publisherId)
+            }
+            Log.d(TAG, "onPressence: ${event?.publisherId}")
         }
     }
 

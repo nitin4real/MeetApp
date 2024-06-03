@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.meetapp.data.UserRepository
 import io.agora.rtc2.ChannelMediaOptions
 import io.agora.rtc2.IRtcEngineEventHandler
 import io.agora.rtc2.RtcEngine
@@ -145,6 +146,7 @@ class VideoViewModel : ViewModel() {
 
     val sessionEventHandler = object : IRtcEngineEventHandler() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
+            UserRepository.registerUid(uid.toString())
             Log.d(TAG, "onUserJoined: Remote User Joined with uid -> $uid")
             addVideoView(uid, true)
         }

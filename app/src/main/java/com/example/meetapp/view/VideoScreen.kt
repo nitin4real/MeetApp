@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.meetapp.R
 import com.example.meetapp.controller.VIEW_MODE
 import com.example.meetapp.controller.VideoViewModel
+import com.example.meetapp.data.UserRepository
 import io.agora.rtc2.video.VideoCanvas
 
 @Composable
@@ -51,13 +52,15 @@ fun VideoScreen(videoVM: VideoViewModel) {
                 val isSpeaking = videoVM.activeSpeakerUid == currentView.uid.toString()
                 val borderColor = if (isSpeaking) Color.Yellow else Color.White
                 val isActive = currentView.isVideoActive
+                val uid = currentView.uid
+                val userName = UserRepository.getName(uid.toString())
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "${currentView.uid}",
+                        text = "${userName}",
                         fontSize = 16.sp,
                     )
                     if (isActive && !(isSpeaking &&  isSpotlightMode)) {
@@ -96,10 +99,11 @@ fun VideoScreen(videoVM: VideoViewModel) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val uid = videoVM.activeSpeakerUid
+                    val userName = UserRepository.getName(uid)
                     if (spotlightItem != null) {
                         if (spotlightItem.isVideoActive) {
                             Text(
-                                text = "${uid}",
+                                text = "${userName}",
                                 fontSize = 18.sp,
                             )
                             AndroidView(

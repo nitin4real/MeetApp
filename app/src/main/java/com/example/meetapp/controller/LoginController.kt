@@ -3,6 +3,7 @@ package com.example.meetapp.controller
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.meetapp.data.UserRepository
 import com.example.meetapp.model.RetrofitClient
 import com.example.meetapp.services.ApiService
 import com.example.meetapp.services.TokenResponse
@@ -40,6 +41,7 @@ class LoginViewModel : ViewModel() {
                         val chatConfig =
                             ChatConfig(it.uid, it.tokens.rtmToken, it.appId, channelName)
                         configs = Configs(videoConfig,chatConfig)
+                        UserRepository.registerUid(it.uid)
                         navigateToConfigs(configs)
                     }
                 }

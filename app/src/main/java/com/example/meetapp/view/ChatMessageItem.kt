@@ -15,10 +15,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.meetapp.controller.ChatMessage
+import com.example.meetapp.data.UserRepository
 import com.example.meetapp.ui.theme.CustomColors
 
 @Composable
 fun ChatMessageItem(chatMessage: ChatMessage) {
+    val uid = chatMessage.uid
+    val userName = UserRepository.getName(uid)
     Column(
         modifier = Modifier
             .padding(4.dp)
@@ -30,7 +33,7 @@ fun ChatMessageItem(chatMessage: ChatMessage) {
         horizontalAlignment = if (chatMessage.recived) Alignment.Start else Alignment.End
     ) {
         if (chatMessage.recived) Text(
-            text = "send by: ${chatMessage.userName}",
+            text = "send by: $userName",
             style = MaterialTheme.typography.bodyMedium
         )
         Text(text = chatMessage.message, style = MaterialTheme.typography.bodyLarge)
