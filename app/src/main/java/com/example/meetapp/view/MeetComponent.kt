@@ -20,15 +20,17 @@ import com.example.meetapp.controller.ChatViewModel
 import com.example.meetapp.controller.MeetViewModel
 import com.example.meetapp.controller.VIEW_TYPE
 import com.example.meetapp.controller.VideoViewModel
+import com.example.meetapp.data.UserRepository
 import com.example.meetapp.ui.theme.CustomColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeetComponent(videoVM: VideoViewModel, chatVM: ChatViewModel, meetVM: MeetViewModel) {
+    val channelName = UserRepository.getChannelName()
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("In Meet", color = Color.White) },
+                title = { Text("In Meet: ${channelName}", color = Color.White) },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = CustomColors.primary
                 ),

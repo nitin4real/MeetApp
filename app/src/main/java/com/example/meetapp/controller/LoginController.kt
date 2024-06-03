@@ -42,6 +42,7 @@ class LoginViewModel : ViewModel() {
                             ChatConfig(it.uid, it.tokens.rtmToken, it.appId, channelName)
                         configs = Configs(videoConfig,chatConfig)
                         UserRepository.registerUid(it.uid)
+                        UserRepository.setChannelName(channelName)
                         navigateToConfigs(configs)
                     }
                 }

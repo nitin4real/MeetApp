@@ -10,9 +10,17 @@ import retrofit2.Response
 
 object UserRepository {
     private val uidNameMap: MutableMap<String, String> = mutableMapOf()
+    private var channelName: String = ""
 
     private val apiService: ApiService by lazy {
         RetrofitClient.instance.create(ApiService::class.java)
+    }
+
+    fun setChannelName(channelName:String){
+        this.channelName = channelName
+    }
+    fun getChannelName():String{
+        return channelName
     }
     fun registerUid(uid: String) {
         apiService.getUserName(uid).enqueue(object : Callback<UserNameResponse> {
