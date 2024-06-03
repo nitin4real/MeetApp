@@ -1,6 +1,8 @@
 package com.example.meetapp
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.meetapp.controller.Configs
 import com.example.meetapp.controller.LoginViewModel
 import com.example.meetapp.view.MeetActivity
@@ -30,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        requestCameraAndMicrophonePermissions()
         enableEdgeToEdge()
 
         setContent {
@@ -46,4 +50,22 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    private fun requestCameraAndMicrophonePermissions() {
+        val cameraPermission = Manifest.permission.CAMERA
+        val microphonePermission = Manifest.permission.RECORD_AUDIO
+
+        // Check if the permissions are already granted
+        val cameraPermissionGranted = ContextCompat.checkSelfPermission(this, cameraPermission) == PackageManager.PERMISSION_GRANTED
+        val microphonePermissionGranted = ContextCompat.checkSelfPermission(this, microphonePermission) == PackageManager.PERMISSION_GRANTED
+
+        if (!cameraPermissionGranted || !microphonePermissionGranted) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(cameraPermission, microphonePermission),
+                123
+            )
+        }
+    }
+
+
 }
