@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.meetapp.R
 import com.example.meetapp.controller.MeetViewModel
+import com.example.meetapp.controller.VIEW_MODE
 import com.example.meetapp.controller.VideoViewModel
 import com.example.meetapp.ui.theme.CustomColors
 
@@ -52,9 +53,11 @@ fun BottomButtons(meetVM: MeetViewModel, videoVM: VideoViewModel) {
             }
             RoundButton(
                 R.drawable.switch_video_view,
-                Color.Green
+                if(videoVM.viewMode == VIEW_MODE.grid) CustomColors.tertiary else Color.Green
             ) {
-//                videoVM.videoEngine.muteLocalVideoStream(false)
+                val toastText = if (videoVM.viewMode == VIEW_MODE.grid) "Switched to Spotlight mode" else "Switched to Grid View"
+                Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
+                videoVM.toggleViewMode()
             }
             RoundButton(
                 R.drawable.leave,

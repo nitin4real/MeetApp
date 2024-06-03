@@ -2,7 +2,6 @@ package com.example.meetapp.controller
 
 import android.content.Context
 import android.util.Log
-import android.view.SurfaceView
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +9,9 @@ import io.agora.rtc2.ChannelMediaOptions
 import io.agora.rtc2.IRtcEngineEventHandler
 import io.agora.rtc2.RtcEngine
 import io.agora.rtc2.RtcEngineConfig
-import io.agora.rtc2.video.VideoCanvas
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 data class VideoConfig(
     val userId: String,
@@ -19,11 +20,16 @@ data class VideoConfig(
     val channelName: String
 )
 
-data class VideoView(val video: SurfaceView, val uid: Int, val isVideoActive: Boolean)
+enum class VIEW_MODE {
+    grid,
+    spotlight
+}
+
+data class VideoView(val uid: Int, val isVideoActive: Boolean)
 class VideoViewModel : ViewModel() {
 
     var videoEngine: RtcEngine? = null
-    private lateinit var videoConfig: VideoConfig
+    lateinit var videoConfig: VideoConfig
     private val _activeVideoView = mutableStateListOf<VideoView>()
 
     lateinit var context: Context
@@ -33,13 +39,19 @@ class VideoViewModel : ViewModel() {
 
     private val _isVideoOn = mutableStateOf(true)
     val isVideoOn get() = _isVideoOn.value
+    private val _showSpotlight = mutableStateOf(true)
+    val showSpotlight get() = _showSpotlight.value
+
 
     private val _isMicOn = mutableStateOf(true)
     val isMicOn get() = _isMicOn.value
 
+    private val _ViewMode = mutableStateOf(VIEW_MODE.grid)
+    val viewMode get() = _ViewMode.value
 
-    fun addVideoView(videoView: SurfaceView, uid: Int, isActive: Boolean) {
-        _activeVideoView.add(VideoView(videoView, uid, isActive))
+
+    fun addVideoView(uid: Int, isActive: Boolean) {
+        _activeVideoView.add(VideoView(uid, isActive))
     }
 
     fun startEngine(context: Context, videoConfig: VideoConfig): Unit {
@@ -55,16 +67,8 @@ class VideoViewModel : ViewModel() {
             videoEngine?.enableVideo();
             _isVideoOn.value = true
             videoEngine?.startPreview()
-            val localView = SurfaceView(context)
-            videoEngine?.setupLocalVideo(
-                VideoCanvas(
-                    localView,
-                    VideoCanvas.RENDER_MODE_FIT,
-                    videoConfig.userId.toInt()
-                )
-            )
-            addVideoView(localView, videoConfig.userId.toInt(), true)
-            videoEngine?.enableAudioVolumeIndication(300, 3, true)
+            addVideoView(videoConfig.userId.toInt(), true)
+            videoEngine?.enableAudioVolumeIndication(700, 3, true)
             Log.d(TAG, "Start Engine Success. Brrrr brrrr brrr(Noise of the engine)")
         } catch (e: Exception) {
             Log.d(TAG, "startEngin: Error occurect while createing view engine${e.message}")
@@ -112,6 +116,14 @@ class VideoViewModel : ViewModel() {
         }
     }
 
+    fun toggleViewMode() {
+        if (viewMode == VIEW_MODE.grid) {
+            _ViewMode.value = VIEW_MODE.spotlight
+        } else {
+            _ViewMode.value = VIEW_MODE.grid
+        }
+    }
+
     fun destroy() {
         videoEngine?.disableVideo()
         videoEngine?.disableAudio()
@@ -124,7 +136,7 @@ class VideoViewModel : ViewModel() {
         val index = _activeVideoView.indexOfFirst { it.uid == uid }
         if (index != -1) {
             val currentView = _activeVideoView[index]
-            val updatedView = VideoView(currentView.video, uid, isActive)
+            val updatedView = VideoView(uid, isActive)
             if (index != -1) {
                 _activeVideoView[index] = updatedView
             }
@@ -134,9 +146,7 @@ class VideoViewModel : ViewModel() {
     val sessionEventHandler = object : IRtcEngineEventHandler() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
             Log.d(TAG, "onUserJoined: Remote User Joined with uid -> $uid")
-            val remoteView = SurfaceView(context)
-            videoEngine?.setupRemoteVideo(VideoCanvas(remoteView, VideoCanvas.RENDER_MODE_FIT, uid))
-            addVideoView(remoteView, uid, true)
+            addVideoView(uid, true)
         }
 
         override fun onUserMuteVideo(uid: Int, muted: Boolean) {
@@ -155,12 +165,26 @@ class VideoViewModel : ViewModel() {
                     val volume = speaker.volume
                     if (volume > 100) {
                         if (uid === 0) {
-                            _activeSpeakerUid.value = videoConfig.userId
+                            if(_activeSpeakerUid.value != videoConfig.userId){
+                                resetSpotlight()
+                                _activeSpeakerUid.value = videoConfig.userId
+                            }
                         } else {
-                            _activeSpeakerUid.value = uid.toString()
+                            if(_activeSpeakerUid.value != uid.toString()){
+                                resetSpotlight()
+                                _activeSpeakerUid.value = uid.toString()
+                            }
                         }
                     }
                 }
+            }
+        }
+
+        fun resetSpotlight(){
+            _showSpotlight.value = false
+            GlobalScope.launch {
+                delay(500)
+                _showSpotlight.value = true
             }
         }
 

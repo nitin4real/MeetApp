@@ -30,12 +30,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
-        loginVM.getAgoraToken("123", "123", navigateToMeet)
 
         setContent {
-            if(!loginVM.isTokenSuccess){
-                Toast.makeText(this,"Error While logging in, Please try again", Toast.LENGTH_LONG).show()
+            if (!loginVM.isTokenSuccess) {
+                Toast.makeText(this, "Error While logging in, Please try again", Toast.LENGTH_LONG)
+                    .show()
                 loginVM.setTokenSuccess(true)
             }
             Box(modifier = Modifier.padding(50.dp)) {
@@ -46,4 +47,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
